@@ -1,0 +1,29 @@
+-- =============================================================================
+-- Clone tables from PUBLIC to RAW (zero-copy in Snowflake).
+-- Run as ACCOUNTADMIN (or role that owns NETFLIX_MOVIE.PUBLIC).
+-- dbt will then read from RAW; no SELECT on PUBLIC needed.
+-- =============================================================================
+
+USE ROLE ACCOUNTADMIN;
+USE WAREHOUSE COMPUTE_WH;
+USE DATABASE NETFLIX_MOVIE;
+
+-- 1. RAW schema (already exists from snowflake_setup.sql; ensure it)
+CREATE SCHEMA IF NOT EXISTS RAW;
+
+-- 2. Clone each table from PUBLIC to RAW (zero-copy, no data duplication)
+CREATE OR REPLACE TABLE RAW.MOVIES CLONE PUBLIC.MOVIES;
+CREATE OR REPLACE TABLE RAW.RATINGS CLONE PUBLIC.RATINGS;
+CREATE OR REPLACE TABLE RAW.LINKS CLONE PUBLIC.LINKS;
+CREATE OR REPLACE TABLE RAW.GENOME_TAGS CLONE PUBLIC.GENOME_TAGS;
+CREATE OR REPLACE TABLE RAW.GENOME_SCORES CLONE PUBLIC.GENOME_SCORES;
+
+-- 3. Grant TRANSFORM (dbt) access to RAW
+GRANT USAGE ON SCHEMA NETFLIX_MOVIE.RAW TO ROLE TRANSFORM;
+GRANT SELECT ON ALL TABLES IN SCHEMA NETFLIX_MOVIE.RAW TO ROLE TRANSFORM;
+GRANT SELECT ON FUTURE TABLES IN SCHEMA NETFLIX_MOVIE.RAW TO ROLE TRANSFORM;
+
+-- Optional: refresh clones when PUBLIC data changes (run when needed)
+-- CREATE OR REPLACE TABLE RAW.MOVIES CLONE PUBLIC.MOVIES;
+-- CREATE OR REPLACE TABLE RAW.RATINGS CLONE PUBLIC.RATINGS;
+-- ... etc

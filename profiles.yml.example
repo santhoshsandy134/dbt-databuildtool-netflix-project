@@ -1,0 +1,19 @@
+# Snowflake profile for dbt (uses dedicated dbt user + TRANSFORM role)
+# 1. Copy this file to ~/.dbt/profiles.yml (or use --profiles-dir . from netflix/)
+# 2. Never commit profiles.yml with real passwords to git
+
+netflix:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: MRLLBLD-IJ42733
+      user: "dbt"
+      password: "dbtPassword123"
+      role: "TRANSFORM"
+      database: "NETFLIX_MOVIE"
+      warehouse: "COMPUTE_WH"
+      schema: "STAGING"
+      threads: 4
+      client_session_keep_alive: false
+
